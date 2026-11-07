@@ -27,13 +27,7 @@
       transform-origin: top left;
     }
 
-    /* Freeze header vertikal dan kolom Flag sampai Customer Name di Sample Report */
-    #table-scroll-container thead th {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background-color: #f1f5f9;
-    }
+    /* Freeze kolom Flag, Date Requested, Sales di tab Sample Report */
     .freeze-col {
       position: sticky;
       background-color: #ffffff;
@@ -41,15 +35,36 @@
       box-sizing: border-box;
       box-shadow: inset -1px 0 0 #e2e8f0, inset 0 -1px 0 #e2e8f0;
     }
-    #table-scroll-container thead .freeze-col {
-      background-color: #f1f5f9;
-      z-index: 30;
-    }
-    #table-scroll-container thead th.cursor-pointer.freeze-col:hover { background-color: #e2e8f0; }
-    #table-scroll-container tbody tr:hover .freeze-col { background-color: #f8fafc; }
+    thead .freeze-col { background-color: #f1f5f9; z-index: 20; }
+    thead th.cursor-pointer.freeze-col:hover { background-color: #e2e8f0; }
+    tbody tr:hover .freeze-col { background-color: #f8fafc; }
     .freeze-last {
       box-shadow: inset -1px 0 0 #e2e8f0, inset 0 -1px 0 #e2e8f0, 5px 0 6px -4px rgba(15, 23, 42, 0.22);
     }
+
+    /* Freeze dinamis:
+       - posisi kiri  : Flag, Date Requested, Sales
+       - setelah scroll ke kanan (.freeze-b): Flag dilepas, lalu
+         Date Requested, Sales, Customer Name, Sample Requested yang freeze */
+    #table-scroll-container { --l-date: 52px; --l-sales: 176px; }
+    #table-scroll-container.freeze-b { --l-date: 0px; --l-sales: 124px; }
+    .freeze-col { transition: left 0.15s ease; }
+    .col-cust, .col-samp { box-sizing: border-box; }
+    .freeze-b .col-flag { position: static; box-shadow: none; }
+    .freeze-b .freeze-last { box-shadow: inset -1px 0 0 #e2e8f0, inset 0 -1px 0 #e2e8f0; }
+    .freeze-b .col-cust, .freeze-b .col-samp {
+      position: sticky;
+      background-color: #ffffff;
+      z-index: 5;
+      box-shadow: inset -1px 0 0 #e2e8f0, inset 0 -1px 0 #e2e8f0;
+    }
+    .freeze-b .col-cust { left: 188px; }
+    .freeze-b .col-samp {
+      left: 368px;
+      box-shadow: inset -1px 0 0 #e2e8f0, inset 0 -1px 0 #e2e8f0, 5px 0 6px -4px rgba(15, 23, 42, 0.22);
+    }
+    .freeze-b thead .col-cust, .freeze-b thead .col-samp { background-color: #f1f5f9; z-index: 20; }
+    .freeze-b tbody tr:hover .col-cust, .freeze-b tbody tr:hover .col-samp { background-color: #f8fafc; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -80,6 +95,7 @@
           </label>
           <button onclick="openSyncSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Online
+            <span id="sync-dot" class="w-2 h-2 rounded-full bg-slate-300 inline-block" title="Belum diatur"></span>
           </button>
         </div>
       </div>
@@ -306,17 +322,17 @@
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-700 uppercase font-bold sticky top-0 z-10 border-b border-slate-200 shadow-xs">
               <tr>
-                <th class="freeze-col p-2 text-center bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:0;width:52px;min-width:52px;max-width:52px" onclick="toggleFlagFilter()" title="Klik untuk memfilter Flag">Flag <i data-lucide="filter" class="w-3 h-3 inline-block text-slate-400"></i></th>
+                <th class="freeze-col col-flag p-2 text-center bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:0;width:52px;min-width:52px;max-width:52px" onclick="toggleFlagFilter()" title="Klik untuk memfilter Flag">Flag <i data-lucide="filter" class="w-3 h-3 inline-block text-slate-400"></i></th>
                 <!-- PERUBAHAN SORT DATE REQUESTED -->
-                <th class="freeze-col p-3 bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:52px;width:124px;min-width:124px;max-width:124px" onclick="toggleDateSort()" title="Klik untuk mengurutkan (Newest/Oldest)">
+                <th class="freeze-col p-3 bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:var(--l-date);width:124px;min-width:124px;max-width:124px" onclick="toggleDateSort()" title="Klik untuk mengurutkan (Newest/Oldest)">
                   <div class="flex items-center gap-1.5">
                     Date Requested
                     <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-slate-400"></i>
                   </div>
                 </th>
-                <th class="freeze-col freeze-last p-2 bg-slate-100 text-center" style="left:176px;width:64px;min-width:64px;max-width:64px">Sales</th>
-                <th class="freeze-col freeze-last p-3 bg-slate-100" style="left:240px;width:180px;min-width:180px;max-width:180px">Customer Name</th>
-                <th class="p-3 min-w-[160px] bg-slate-100">Sample Requested</th>
+                <th class="freeze-col freeze-last p-2 bg-slate-100 text-center" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px">Sales</th>
+                <th class="col-cust p-3 bg-slate-100" style="width:180px;min-width:180px;max-width:180px">Customer Name</th>
+                <th class="col-samp p-3 bg-slate-100" style="width:170px;min-width:170px;max-width:170px">Sample Requested</th>
                 <th class="p-3 min-w-[80px] bg-slate-100">Qty</th>
                 <th class="p-3 min-w-[120px] bg-slate-100">Application</th>
                 <th class="p-2 border-l border-r border-slate-200 text-center min-w-[340px] bg-slate-100" colspan="3">
@@ -545,15 +561,16 @@
       </div>
       <div class="p-6 space-y-4">
         <p class="text-xs text-slate-500 leading-relaxed">
-          Masukkan Webhook Endpoint / API URL dari server backend Anda (Google Apps Script / Supabase / REST API) untuk sinkronisasi data.
+          Masukkan URL Web App (Google Apps Script) agar data otomatis sama di semua perangkat (laptop, HP). Data dimuat saat aplikasi dibuka dan dikirim otomatis setiap ada perubahan.
         </p>
+        <p id="sync-status-text" class="text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">Status: belum diatur</p>
         <div>
           <label class="block text-xs font-medium text-slate-700 mb-1">Webhook / API Endpoint URL</label>
           <input type="url" id="sync-endpoint-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
         </div>
         <div class="flex items-center gap-2 pt-2">
           <button onclick="performOnlineSync()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sinkronisasi Sekarang
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Simpan & Sinkronisasi Sekarang
           </button>
         </div>
       </div>
@@ -579,6 +596,11 @@
     let salesData = JSON.parse(localStorage.getItem('st_sales_data')) || INITIAL_SALES;
     let sampleReports = JSON.parse(localStorage.getItem('st_sample_reports')) || [];
     
+    // URL Web App Google Apps Script (diisi sekali di sini agar semua perangkat otomatis terhubung)
+    const DEFAULT_SYNC_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw4YTu9cdOhT5iPuuOfDh7i_I-VA_xany-i3e3_t5DEP5_7paKWxO9BtCzQf-nZsis0/exec';
+    let syncBusy = false;
+    let syncTimer = null;
+
     let masterExpandedState = {};
     let currentZoom = 1.0;
     
@@ -620,8 +642,8 @@
           }
         ]
       });
-      sortMasterCustomersAZ();
-      saveDataToStorage();
+      persistLocal();
+      localStorage.setItem('st_demo_seed', '1');   // data contoh, tidak boleh dikirim ke server
     }
 
     function sortMasterCustomersAZ() {
@@ -632,10 +654,184 @@
       });
     }
 
-    function saveDataToStorage() {
+    function persistLocal() {
       sortMasterCustomersAZ();
       localStorage.setItem('st_sales_data', JSON.stringify(salesData));
       localStorage.setItem('st_sample_reports', JSON.stringify(sampleReports));
+    }
+
+    function saveDataToStorage() {
+      persistLocal();
+      syncMarkDirty();
+    }
+
+    // =========================================================================
+    // SINKRONISASI ONLINE (Google Apps Script) — dua arah, otomatis
+    // - Saat aplikasi dibuka / tab kembali aktif: data terbaru dari server dimuat
+    // - Setiap ada perubahan: data dikirim ke server (otomatis, jeda 1.5 detik)
+    // - Jika server lebih baru dari data di perangkat ini, data server yang dipakai
+    // Isi URL Web App di bawah ini SEKALI sebelum upload ke GitHub, supaya semua
+    // perangkat langsung terhubung tanpa perlu mengisi URL satu per satu.
+    // =========================================================================
+    function getSyncEndpoint() {
+      return (localStorage.getItem('st_sync_endpoint') || DEFAULT_SYNC_ENDPOINT || '').trim();
+    }
+    function getSyncRev() { return parseInt(localStorage.getItem('st_sync_rev') || '0', 10) || 0; }
+    function isSyncDirty() { return localStorage.getItem('st_sync_dirty') === '1'; }
+
+    function setSyncStatus(state, msg) {
+      const colors = { off: 'bg-slate-300', ok: 'bg-emerald-500', busy: 'bg-amber-400', err: 'bg-rose-500' };
+      const dot = document.getElementById('sync-dot');
+      if (dot) {
+        dot.className = `w-2 h-2 rounded-full inline-block ${colors[state] || colors.off}`;
+        dot.title = msg;
+      }
+      const t = document.getElementById('sync-status-text');
+      if (t) t.innerText = 'Status: ' + msg;
+    }
+
+    function syncMarkDirty() {
+      if (!getSyncEndpoint()) return;
+      localStorage.setItem('st_sync_dirty', '1');
+      setSyncStatus('busy', 'menunggu dikirim...');
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => syncNow(false), 1500);
+    }
+
+    function refreshAllViews() {
+      populateSalesDropdowns();
+      populateYearFilter();
+      renderDashboard();
+      renderReportTable();
+      renderSalesCards();
+      renderMasterData();
+    }
+
+    function applyServerData(res) {
+      if (res.data && Array.isArray(res.data.salesData)) salesData = res.data.salesData;
+      if (res.data && Array.isArray(res.data.sampleReports)) sampleReports = res.data.sampleReports;
+      persistLocal();
+      localStorage.setItem('st_sync_rev', String(res.rev));
+      localStorage.setItem('st_sync_dirty', '0');
+      localStorage.removeItem('st_demo_seed');
+      refreshAllViews();
+    }
+
+    // Penggabungan saat perangkat ini pertama kali tersambung dan sudah punya data sendiri:
+    // semua permintaan sample & customer dari kedua sisi dipertahankan (id sama -> versi server).
+    function mergeIntoLocal(srv) {
+      const byId = new Map();
+      sampleReports.forEach(r => byId.set(r.id, r));
+      (srv.sampleReports || []).forEach(r => byId.set(r.id, r));
+      sampleReports = Array.from(byId.values());
+      const bySales = new Map();
+      salesData.forEach(sd => bySales.set(sd.code, sd));
+      (srv.salesData || []).forEach(sv => {
+        const cur = bySales.get(sv.code);
+        if (!cur) { salesData.push(sv); return; }
+        cur.customers = cur.customers || [];
+        const names = new Set(cur.customers.map(c => c.name));
+        (sv.customers || []).forEach(c => { if (!names.has(c.name)) cur.customers.push(c); });
+      });
+      persistLocal();
+    }
+
+    async function syncFetchServer(endpoint) {
+      const url = endpoint + (endpoint.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('Status server ' + r.status);
+      return r.json();
+    }
+
+    async function syncNow(manual) {
+      const endpoint = getSyncEndpoint();
+      if (!endpoint) { setSyncStatus('off', 'belum diatur'); return false; }
+      if (syncBusy) return false;
+      syncBusy = true;
+      clearTimeout(syncTimer);
+      setSyncStatus('busy', 'menyinkronkan...');
+      try {
+        const server = await syncFetchServer(endpoint);
+        if (!server || server.ok === false) throw new Error((server && server.error) || 'Respons server tidak valid');
+        const localRev = getSyncRev();
+
+        const isDemo = localStorage.getItem('st_demo_seed') === '1';
+        let merged = false;
+
+        if (server.rev > localRev && server.data) {
+          if ((localRev === 0 || isSyncDirty()) && !isDemo) {
+            // perangkat ini baru pertama tersambung, atau punya perubahan yang belum terkirim -> gabungkan, jangan ditimpa
+            mergeIntoLocal(server.data);
+            localStorage.setItem('st_sync_rev', String(server.rev));
+            localStorage.setItem('st_sync_dirty', '1');
+            refreshAllViews();
+            merged = true;
+          } else {
+            // server lebih baru -> pakai data server
+            applyServerData(server);
+            setSyncStatus('ok', 'tersinkron (data terbaru dimuat dari server)');
+            if (manual) alert('Data terbaru berhasil dimuat dari server.');
+            return true;
+          }
+        }
+
+        if (merged || isSyncDirty() || manual || (server.rev === 0 && !isDemo)) {
+          const resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'save',
+              baseRev: server.rev,
+              data: { salesData, sampleReports }
+            })
+          });
+          const res = await resp.json();
+          if (res.ok) {
+            localStorage.setItem('st_sync_rev', String(res.rev));
+            localStorage.setItem('st_sync_dirty', '0');
+            localStorage.removeItem('st_demo_seed');
+            setSyncStatus('ok', 'tersinkron ' + new Date().toLocaleTimeString('id-ID'));
+            if (merged) alert('Data di perangkat ini sudah digabung dengan data di server.');
+            else if (manual) alert('Sinkronisasi berhasil!');
+          } else if (res.conflict) {
+            // perangkat lain sudah mengirim lebih dulu -> gabungkan lalu kirim ulang
+            mergeIntoLocal(res.data || {});
+            localStorage.setItem('st_sync_rev', String(res.rev));
+            localStorage.setItem('st_sync_dirty', '1');
+            refreshAllViews();
+            setSyncStatus('busy', 'menggabungkan dengan perubahan dari perangkat lain...');
+            syncTimer = setTimeout(() => syncNow(false), 300);
+          } else {
+            throw new Error(res.error || 'Gagal menyimpan ke server');
+          }
+        } else {
+          setSyncStatus('ok', 'tersinkron ' + new Date().toLocaleTimeString('id-ID'));
+        }
+        return true;
+      } catch (err) {
+        setSyncStatus('err', 'gagal: ' + err.message);
+        if (manual) alert('Gagal sinkronisasi: ' + err.message);
+        return false;
+      } finally {
+        syncBusy = false;
+      }
+    }
+
+    function startSyncTimers() {
+      if (window.__syncTimers) return;
+      window.__syncTimers = true;
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncNow(false);
+      });
+      setInterval(() => {
+        if (document.visibilityState === 'visible') syncNow(false);
+      }, 60000);
+    }
+
+    function initOnlineSync() {
+      if (!getSyncEndpoint()) { setSyncStatus('off', 'belum diatur'); return; }
+      syncNow(false);
+      startSyncTimers();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -648,6 +844,7 @@
       renderReportTable();
       renderSalesCards();
       renderMasterData();
+      initOnlineSync();
     });
 
     function updateDateDisplay() {
@@ -679,6 +876,17 @@
         }
         isSyncingTable = false;
       });
+
+      tableScroll.addEventListener('scroll', updateFreezeState, { passive: true });
+      updateFreezeState();
+    }
+
+    // Freeze dinamis: setelah Flag (52px) tergeser keluar, Flag dilepas dan
+    // kolom Customer Name & Sample Requested ikut di-freeze bersama Date Requested & Sales.
+    function updateFreezeState() {
+      const c = document.getElementById('table-scroll-container');
+      if (!c) return;
+      c.classList.toggle('freeze-b', c.scrollLeft > 52 * currentZoom);
     }
 
     function updateTopScrollbarWidth() {
@@ -708,6 +916,7 @@
         wrapper.style.width = '100%';
         indicator.innerText = `${Math.round(currentZoom * 100)}%`;
         updateTopScrollbarWidth();
+        updateFreezeState();
       }
     }
 
@@ -953,18 +1162,18 @@
 
           if (isFirstRow) {
             rowHTML += `
-              <td rowspan="${itemCount}" class="freeze-col p-2 text-center align-middle border-r border-slate-200" style="left:0;width:52px;min-width:52px;max-width:52px">
+              <td rowspan="${itemCount}" class="freeze-col col-flag p-2 text-center align-middle border-r border-slate-200" style="left:0;width:52px;min-width:52px;max-width:52px">
                 ${isItemFlagged ? '<span class="inline-block w-3 h-3 bg-rose-500 rounded-full animate-ping" title="Target Feedback Date tercapai/terlewat"></span>' : '<span class="inline-block w-2 h-2 bg-slate-200 rounded-full"></span>'}
               </td>
-              <td rowspan="${itemCount}" class="freeze-col p-3 align-top border-r border-slate-200" style="left:52px;width:124px;min-width:124px;max-width:124px">
+              <td rowspan="${itemCount}" class="freeze-col p-3 align-top border-r border-slate-200" style="left:var(--l-date);width:124px;min-width:124px;max-width:124px">
                 <div class="font-bold text-slate-800">${req.dateRequested}</div>
                 <div class="text-[10px] text-slate-400 mt-1">Est. Feedback:</div>
                 <div class="text-[11px] font-semibold ${isItemFlagged ? 'text-rose-600' : 'text-slate-600'}">${req.estimatedFeedbackDate}</div>
               </td>
-              <td rowspan="${itemCount}" class="freeze-col freeze-last p-2 align-top border-r border-slate-200 text-center" style="left:176px;width:64px;min-width:64px;max-width:64px">
+              <td rowspan="${itemCount}" class="freeze-col freeze-last p-2 align-top border-r border-slate-200 text-center" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px">
                 <span class="bg-indigo-50 text-indigo-700 font-bold px-1.5 py-0.5 rounded text-[11px] inline-block">${req.salesCode}</span>
               </td>
-              <td rowspan="${itemCount}" class="freeze-col freeze-last p-3 align-top border-r border-slate-200" style="left:240px;width:180px;min-width:180px;max-width:180px">
+              <td rowspan="${itemCount}" class="col-cust p-3 align-top border-r border-slate-200" style="width:180px;min-width:180px;max-width:180px">
                 <div class="font-bold text-slate-800">${req.customerName}</div>
                 <div class="text-[10px] text-slate-400 mt-0.5">${getSafeString(req.customerContact)}</div>
               </td>
@@ -974,7 +1183,7 @@
           const qtyDisplay = (item.qty1 && item.qty2) ? `${item.qty1} × ${item.qty2} = <b>${item.qty}</b>` : `<b>${item.qty}</b>`;
 
           rowHTML += `
-            <td class="p-3 align-top border-r border-slate-200">
+            <td class="col-samp p-3 align-top border-r border-slate-200" style="width:170px;min-width:170px;max-width:170px">
               <div class="font-semibold text-slate-800">${item.itemName}</div>
               <div class="text-[10px] text-slate-400">Batch/Lot: ${item.batch || '-'}</div>
             </td>
@@ -2069,7 +2278,7 @@
     // ONLINE DATABASE SYNC & EXCEL IMPORT/EXPORT
     // =========================================================================
     function openSyncSettingsModal() {
-      const storedUrl = localStorage.getItem('st_sync_endpoint') || '';
+      const storedUrl = getSyncEndpoint();
       document.getElementById('sync-endpoint-url').value = storedUrl;
       document.getElementById('modal-sync-settings').classList.remove('hidden');
     }
@@ -2077,33 +2286,13 @@
     async function performOnlineSync() {
       const endpoint = document.getElementById('sync-endpoint-url').value.trim();
       if (!endpoint) {
-        alert('Silakan masukkan Webhook / API Endpoint URL terlebih dahulu.');
+        alert('Silakan masukkan URL Web App (Google Apps Script) terlebih dahulu.');
         return;
       }
       localStorage.setItem('st_sync_endpoint', endpoint);
-
-      try {
-        const payload = {
-          salesData: salesData,
-          sampleReports: sampleReports,
-          lastSync: new Date().toISOString()
-        };
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          alert('Sinkronisasi database online berhasil!');
-          closeModal('modal-sync-settings');
-        } else {
-          alert('Gagal melakukan sinkronisasi online. Status Server: ' + response.status);
-        }
-      } catch (err) {
-        alert('Terjadi kesalahan koneksi saat sinkronisasi online: ' + err.message);
-      }
+      const ok = await syncNow(true);
+      if (ok) closeModal('modal-sync-settings');
+      startSyncTimers();
     }
 
     function exportToExcel() {
