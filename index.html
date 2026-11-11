@@ -44,38 +44,31 @@
       background-color: var(--cell-bg);
       z-index: 5;
       box-sizing: border-box;
-      box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line);
+      box-shadow: 1px 0 0 var(--cell-bg), inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line);   /* bayangan 1px menutup celah border-collapse */
     }
-    thead .freeze-col { background-color: var(--cell-head); z-index: 20; }
+    .freeze-col { border-right-width: 0 !important; }   /* garis dibuat lewat inset shadow (border transparan membuat isi di bawahnya tembus) */
+    thead .freeze-col { background-color: var(--cell-head); z-index: 20; box-shadow: 1px 0 0 var(--cell-head), inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line); }
     thead th.cursor-pointer.freeze-col:hover { background-color: var(--cell-head); }
     tbody tr:hover .freeze-col { background-color: var(--cell-hover); }
-    .freeze-last {
-      box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line), 6px 0 8px -5px rgba(40, 30, 120, 0.35);
+    .freeze-last, thead .freeze-last {
+      box-shadow: 1px 0 0 var(--cell-bg), inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line), 7px 0 8px -5px rgba(40, 30, 120, 0.35);
+    }
+    thead .freeze-last { box-shadow: 1px 0 0 var(--cell-head), inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line), 7px 0 8px -5px rgba(40, 30, 120, 0.35); }
+
+    /* Freeze statis (geser ke kanan): Flag, Date Requested, Sales, Customer Name */
+    #table-scroll-container { --l-date: 52px; --l-sales: 176px; --l-cust: 240px; }
+    .col-cust, .col-samp { box-sizing: border-box; }
+    @media (max-width: 720px) {   /* layar sempit: Customer Name tidak di-freeze agar tabel tetap bisa digeser */
+      .col-cust.freeze-col { position: static; box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line); }
+      .col-sales { box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line), 6px 0 8px -5px rgba(40, 30, 120, 0.35) !important; }
     }
 
-    /* Freeze dinamis:
-       - posisi kiri  : Flag, Date Requested, Sales
-       - setelah scroll ke kanan (.freeze-b): Flag dilepas, lalu
-         Date Requested, Sales, Customer Name, Sample Requested yang freeze */
-    #table-scroll-container { --l-date: 52px; --l-sales: 176px; }
-    #table-scroll-container.freeze-b { --l-date: 0px; --l-sales: 124px; }
-    .freeze-col { transition: left 0.15s ease; }
-    .col-cust, .col-samp { box-sizing: border-box; }
-    .freeze-b .col-flag { position: static; box-shadow: none; }
-    .freeze-b .freeze-last { box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line); }
-    .freeze-b .col-cust, .freeze-b .col-samp {
-      position: sticky;
-      background-color: var(--cell-bg);
-      z-index: 5;
-      box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line);
-    }
-    .freeze-b .col-cust { left: 188px; }
-    .freeze-b .col-samp {
-      left: 368px;
-      box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line), 6px 0 8px -5px rgba(40, 30, 120, 0.35);
-    }
-    .freeze-b thead .col-cust, .freeze-b thead .col-samp { background-color: var(--cell-head); z-index: 20; }
-    .freeze-b tbody tr:hover .col-cust, .freeze-b tbody tr:hover .col-samp { background-color: var(--cell-hover); }
+    /* Header tabel Sample Report: judul rata tengah, ikon filter/sort kecil di sudut kanan atas */
+    #table-scroll-container thead th { text-align: center; vertical-align: middle; }
+    #table-scroll-container thead th:not(.freeze-col) { position: relative; }
+    #table-scroll-container thead th .th-ico { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; color: var(--t400); }
+    #table-scroll-container thead th:hover .th-ico { color: var(--accent); }
+    #table-scroll-container thead th .th-label { display: block; padding: 0 6px; }
 
     /* =====================================================================
        FROST UI (SOFT GLASS) × CLAYMORPHISM × GLASSMORPHISM  — terang & gelap
@@ -443,6 +436,7 @@
 
     /* tanpa dukungan blur: pakai panel lebih pekat */
 
+    html body #report-sticky, html body #master-sticky { top: calc(var(--hdr-h, 108px) + 6px) !important; }
     /* ---- Sample Report: toolbar 1 baris + filter header kolom ---- */
     #report-toolbar .fsel { position: relative; display: inline-flex; align-items: center; }
     #report-toolbar .fsel > i, #report-toolbar .fsel > svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--t400); z-index: 1; }
@@ -459,6 +453,9 @@
     #cust-sort-ui { color: var(--t400); }
     th.th-on #cust-sort-ui { color: var(--accent); }
     th.th-on #cust-sort-ui svg { color: var(--accent) !important; }
+    #table-scroll-container thead #cust-sort-ui { position: absolute; top: 3px; right: 4px; }
+    #table-scroll-container thead #cust-sort-ui.hidden { display: none; }
+    #table-scroll-container thead #cust-sort-ui.inline-flex { display: inline-flex; }
 
     /* popover filter Sales (kaca) */
     #sales-pop {
@@ -483,6 +480,85 @@
     #sales-pop .sp-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #sales-pop .sp-count { font-size: 10px; font-weight: 700; color: var(--t400); }
     @media (prefers-reduced-motion: reduce) { #sales-pop { animation: none; } }
+
+
+    /* ---- Tab Sample List: kartu baterai + detail keluar-masuk ---- */
+    #sl-layout { display: grid; grid-template-rows: minmax(0, 40fr) minmax(0, 60fr); gap: 14px; height: max(640px, calc(100vh - var(--hdr-h, 120px) - 52px)); }
+    #sl-top { display: grid; grid-template-columns: calc(25% - 7px) calc(75% - 7px); gap: 14px; min-height: 0; }
+    .sl-panel {
+      background: var(--glass); border: 1px solid var(--glass-border); border-radius: 26px;
+      -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: var(--glass-shadow), var(--glass-hl); min-height: 0; min-width: 0;
+    }
+    #sl-controls { padding: 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+    .sl-ctl-head { display: flex; align-items: center; gap: 8px; }
+    .sl-sortrow { display: flex; align-items: center; gap: 6px; }
+    .sl-sortrow select { flex: 1; min-width: 0; }
+    .sl-lbl { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--t500); white-space: nowrap; }
+    .sl-dir { width: 30px; height: 28px; background: linear-gradient(160deg, var(--k1), var(--k2)); border: 1px solid var(--glass-border); box-shadow: var(--clay-shadow), var(--clay-hl); }
+    .sl-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .sl-grid2 select { min-width: 0; text-overflow: ellipsis; }
+    html body #sl-controls select.is-on { border-color: var(--accent) !important; color: var(--accent); font-weight: 600; }
+
+    #sl-cards-wrap { padding: 14px 14px 10px 14px; overflow: hidden; display: flex; }
+    #sl-cards {
+      flex: 1; min-width: 0; display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); grid-auto-flow: column;
+      grid-auto-columns: minmax(190px, 230px); gap: 12px 22px; overflow-x: auto; overflow-y: hidden; padding: 4px 14px 8px 4px;
+    }
+    .sl-empty { grid-row: 1 / span 3; grid-column: 1 / span 3; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--t400); font-size: 12px; padding: 12px; }
+
+    /* kartu sample = baterai HP; warna hanya pada border tebal */
+    .bat { --bat: #22c55e; position: relative; display: flex; align-items: center; padding: 6px 14px; min-height: 0; cursor: pointer;
+      background: var(--glass-strong); border: 5px solid var(--bat) !important; border-radius: 16px; box-sizing: border-box;
+      transition: transform 0.3s var(--ease-spring), box-shadow 0.25s var(--ease-soft); outline: none; }
+    .bat::after { content: ''; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 7px; height: 36%; min-height: 14px; border-radius: 0 6px 6px 0; background: var(--bat); }
+    html[data-theme="light"] .bat { background: rgba(116, 128, 205, 0.20); }
+    .bat-green { --bat: #22c55e; } .bat-orange { --bat: #fb923c; } .bat-red { --bat: #ef4444; }
+    .bat-white { --bat: #ffffff; box-shadow: 0 0 0 1px rgba(100, 112, 170, 0.55); }
+    .bat-white::after { box-shadow: 0 0 0 1px rgba(100, 112, 170, 0.55); }
+    .bat:hover { transform: translateY(-2px); }
+    .bat:focus-visible, .bat.is-sel { box-shadow: 0 0 0 4px rgba(91, 108, 245, 0.38), 0 14px 22px -12px rgba(40, 30, 140, 0.55); transform: translateY(-2px); }
+    .bat-name { font-size: 12.5px; font-weight: 700; color: var(--t800); line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+
+    #sl-detail { display: flex; flex-direction: column; overflow: hidden; }
+    .sd-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--t400); font-size: 13px; padding: 20px; text-align: center; }
+    .sd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 14px 18px 10px; flex-wrap: wrap; }
+    .sd-title { min-width: 0; flex: 1 1 340px; }
+    .sd-name { font-size: 18px; font-weight: 800; color: var(--t900); line-height: 1.2; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sd-cat { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--well); color: var(--c-indigo); }
+    .sd-line { font-size: 12px; color: var(--t500); margin-top: 3px; }
+    .sd-metrics { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .sd-metric { padding: 6px 12px; border-radius: 14px; background: var(--well); border: 1px solid var(--glass-border); box-shadow: var(--input-shadow); min-width: 118px; }
+    .sd-metric small { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--t400); }
+    .sd-metric b { font-size: 14px; color: var(--t900); font-weight: 800; }
+    .sd-metric span { font-size: 11px; color: var(--t500); margin-left: 4px; }
+    .sd-hl { display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 220px; padding: 10px 12px; border-radius: 20px; background: linear-gradient(160deg, var(--k1), var(--k2)); border: 1px solid var(--glass-border); box-shadow: var(--clay-shadow), var(--clay-hl); }
+    .sd-hl-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; font-weight: 700; color: var(--t500); }
+    .sd-hl-row select, .sd-hl-row input { font-size: 12px; padding: 4px 8px; min-width: 0; }
+    .sd-badge { font-size: 12px; font-weight: 800; padding: 3px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+    .st-cukup { background: rgba(34, 197, 94, .18); color: var(--c-emerald); }
+    .st-kurang { background: rgba(251, 146, 60, .2); color: var(--c-amber); }
+    .st-habis { background: rgba(239, 68, 68, .18); color: var(--c-rose); }
+    .sd-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .sd-actions button { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; color: var(--t600); }
+    .sd-actions button:hover { background: var(--well); }
+    .sd-tablebar { display: flex; align-items: center; justify-content: space-between; padding: 6px 18px; border-top: 1px solid var(--line); }
+    .sd-tablebar h3 { font-size: 13px; font-weight: 800; color: var(--t800); }
+    .sd-table-wrap { flex: 1; min-height: 0; overflow: auto; margin: 0 12px 12px; border-radius: 18px; border: 1px solid var(--glass-border); background: var(--cell-bg); }
+    .sd-table { width: 100%; min-width: 860px; border-collapse: collapse; font-size: 12px; }
+    .sd-table thead th { position: sticky; top: 0; z-index: 2; background: var(--cell-head); color: var(--t700); font-weight: 800; text-transform: uppercase; font-size: 11px; padding: 8px; text-align: center; box-shadow: inset 0 -1px 0 var(--line); }
+    .sd-table td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .sd-table tbody tr:hover td { background: var(--cell-hover); }
+    .sd-table td input, .sd-table td select { width: 100%; font-size: 12px; padding: 4px 8px; border-radius: 10px; }
+    .sd-table td input[type="number"] { text-align: right; }
+    .sd-table tfoot td { padding: 7px 8px; font-weight: 800; color: var(--t800); background: var(--cell-head); position: sticky; bottom: 0; box-shadow: inset 0 1px 0 var(--line); }
+    @media (max-width: 900px) {
+      #sl-layout { display: flex; flex-direction: column; height: auto; }
+      #sl-top { grid-template-columns: 1fr; }
+      #sl-cards-wrap { height: 300px; }
+      #sl-detail { min-height: 520px; }
+      .sd-hl { width: 100%; }
+    }
 
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
       :root { --glass: rgba(255, 255, 255, 0.82); --glass-strong: rgba(255, 255, 255, 0.92); }
@@ -543,6 +619,9 @@
           </button>
           <button onclick="switchTab('sales')" id="nav-sales" class="nav-btn flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
             <i data-lucide="users" class="w-3.5 h-3.5"></i> Sales Person
+          </button>
+          <button onclick="switchTab('stock')" id="nav-stock" class="nav-btn flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+            <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i> Sample List
           </button>
           <button onclick="switchTab('master')" id="nav-master" class="nav-btn flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
             <i data-lucide="database" class="w-3.5 h-3.5"></i> Master Data
@@ -671,7 +750,7 @@
     <!-- 2. SAMPLE REPORT TAB -->
     <section id="tab-report" class="space-y-3 hidden">
       <!-- STATIC FILTER BAR -->
-      <div class="sticky top-[108px] z-20 bg-white/95 backdrop-blur-md px-3 py-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
+      <div id="report-sticky" class="sticky top-[108px] z-20 bg-white/95 backdrop-blur-md px-3 py-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div id="report-toolbar" class="flex flex-wrap items-center gap-2">
           <div class="flex items-center gap-2 mr-1">
             <h2 class="font-bold text-slate-900 text-base whitespace-nowrap">Sample Report</h2>
@@ -767,20 +846,16 @@
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-700 uppercase font-bold sticky top-0 z-10 border-b border-slate-200 shadow-xs">
               <tr>
-                <th id="th-flag" class="th-filter freeze-col col-flag p-2 text-center bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:0;width:52px;min-width:52px;max-width:52px" onclick="toggleFlagFilter()" title="Klik untuk memfilter Flag">Flag <i data-lucide="filter" class="w-3 h-3 inline-block text-slate-400"></i></th>
+                <th id="th-flag" class="th-filter freeze-col col-flag p-2 text-center bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:0;width:52px;min-width:52px;max-width:52px" onclick="toggleFlagFilter()" title="Klik untuk memfilter Flag"><span class="th-label">Flag</span><i data-lucide="filter" class="th-ico"></i></th>
                 <!-- PERUBAHAN SORT DATE REQUESTED -->
                 <th class="freeze-col p-3 bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:var(--l-date);width:124px;min-width:124px;max-width:124px" onclick="toggleDateSort()" title="Klik untuk mengurutkan (Newest/Oldest)">
-                  <div class="flex items-center gap-1.5">
-                    Date Requested
-                    <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-slate-400"></i>
-                  </div>
+                  <span class="th-label">Date Requested</span>
+                  <i data-lucide="arrow-up-down" class="th-ico"></i>
                 </th>
-                <th id="th-sales" class="th-filter freeze-col freeze-last p-2 bg-slate-100 text-center cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px" onclick="openSalesFilter(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesFilter(event)}" tabindex="0" role="button" aria-haspopup="listbox" title="Klik untuk memfilter Sales Person">Sales <i data-lucide="filter" class="w-3 h-3 inline-block text-slate-400"></i></th>
-                <th id="th-cust" class="col-cust p-3 bg-slate-100 select-none" style="width:180px;min-width:180px;max-width:180px" onclick="toggleCustSort()" title="">
-                  <div class="flex items-center gap-1.5">
-                    Customer Name
-                    <span id="cust-sort-ui" class="hidden items-center gap-1 normal-case"><i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-slate-400"></i><span id="cust-sort-dir" class="text-[10px] font-bold">A–Z</span></span>
-                  </div>
+                <th id="th-sales" class="th-filter freeze-col col-sales p-2 bg-slate-100 text-center cursor-pointer hover:bg-slate-200 transition-colors select-none" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px" onclick="openSalesFilter(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesFilter(event)}" tabindex="0" role="button" aria-haspopup="listbox" title="Klik untuk memfilter Sales Person"><span class="th-label">Sales</span><i data-lucide="filter" class="th-ico"></i></th>
+                <th id="th-cust" class="col-cust freeze-col freeze-last p-3 bg-slate-100 select-none" style="left:var(--l-cust);width:180px;min-width:180px;max-width:180px" onclick="toggleCustSort()" title="">
+                  <span class="th-label">Customer Name</span>
+                  <span id="cust-sort-ui" class="hidden items-center gap-0.5 normal-case"><i data-lucide="arrow-up-down" class="w-2.5 h-2.5"></i><span id="cust-sort-dir" class="text-[8px] font-bold leading-none">A–Z</span></span>
                 </th>
                 <th class="col-samp p-3 bg-slate-100" style="width:170px;min-width:170px;max-width:170px">Sample Requested</th>
                 <th class="p-3 min-w-[80px] bg-slate-100">Qty</th>
@@ -818,9 +893,67 @@
       </div>
     </section>
 
-    <!-- 4. MASTER DATA TAB -->
+    <!-- 4. SAMPLE LIST TAB -->
+    <section id="tab-stock" class="hidden">
+      <div id="sl-layout">
+        <div id="sl-top">
+          <aside id="sl-controls" class="sl-panel">
+            <div class="sl-ctl-head">
+              <h2 class="font-bold text-slate-900 text-sm">Daftar Sample</h2>
+              <span id="sl-count" class="bg-indigo-50 text-indigo-600 text-[11px] font-semibold px-2 py-0.5 rounded-full">0</span>
+              <button type="button" onclick="openStockModal()" title="Tambah Sample" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm transition-all whitespace-nowrap ml-auto">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah
+              </button>
+            </div>
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="text" id="sl-search" oninput="renderSampleStock()" placeholder="Cari nama / supplier / batch..." class="w-full pl-8 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="sl-sortrow">
+              <label class="sl-lbl"><i data-lucide="arrow-up-down" class="w-3 h-3"></i> Sort</label>
+              <select id="sl-sort" onchange="onStockSortChange()" aria-label="Urutkan" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="name">Nama (A–Z)</option>
+                <option value="remain">Qty Remain</option>
+                <option value="exp">Exp Date</option>
+                <option value="aging">Aging</option>
+              </select>
+              <button type="button" id="sl-dir" onclick="toggleStockDir()" title="Balik urutan" aria-label="Balik urutan" class="sl-dir p-1 rounded-lg text-slate-600 text-xs font-bold">↑</button>
+            </div>
+            <div class="sl-grid2">
+              <select id="sl-f-cat" onchange="renderSampleStock()" aria-label="Filter kategori" title="Kategori" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="">Kategori</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Food & Beverages">Food &amp; Beverages</option>
+                <option value="Taytonn">Taytonn</option>
+              </select>
+              <select id="sl-f-sup" onchange="renderSampleStock()" aria-label="Filter supplier" title="Supplier" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="">Supplier</option>
+              </select>
+              <select id="sl-f-st" onchange="renderSampleStock()" aria-label="Filter status qty" title="Status Qty" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="">Status Qty</option>
+                <option value="cukup">Cukup</option>
+                <option value="kurang">Kurang</option>
+                <option value="habis">Habis</option>
+              </select>
+              <select id="sl-f-cond" onchange="renderSampleStock()" aria-label="Filter kondisi" title="Kondisi" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="">Kondisi</option>
+                <option value="baik">Baik</option>
+                <option value="rusak">Rusak</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+          </aside>
+          <div id="sl-cards-wrap" class="sl-panel">
+            <div id="sl-cards"></div>
+          </div>
+        </div>
+        <div id="sl-detail" class="sl-panel"></div>
+      </div>
+    </section>
+
+    <!-- 5. MASTER DATA TAB -->
     <section id="tab-master" class="space-y-6 hidden">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+      <div id="master-sticky" class="sticky top-[108px] z-20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
           <h2 class="font-bold text-slate-900 text-lg">Master Data Sales & Customer</h2>
           <p class="text-xs text-slate-500">Database customer untuk setiap sales person.</p>
@@ -944,6 +1077,84 @@
     </div>
   </div>
 
+  <!-- MODAL SAMPLE LIST (TAMBAH / EDIT SAMPLE) -->
+  <div id="modal-stock" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 id="stk-modal-title" class="font-bold text-slate-900 text-base">Tambah Sample</h3>
+        <button type="button" onclick="closeModal('modal-stock')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="stock-form" onsubmit="saveStock(event)" class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+        <input type="hidden" id="stk-edit-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Sample *</label>
+          <input type="text" id="stk-name" required placeholder="Contoh: Garlic Powder 100 Mesh" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Supplier *</label>
+            <input type="text" id="stk-supplier" required list="stk-supplier-list" placeholder="Nama supplier" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+            <datalist id="stk-supplier-list"></datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Batch / Lot</label>
+            <input type="text" id="stk-batch" placeholder="Nomor batch / lot" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori *</label>
+            <select id="stk-cat" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+              <option value="">Pilih kategori</option>
+              <option value="Industrial">Industrial</option>
+              <option value="Food & Beverages">Food &amp; Beverages</option>
+              <option value="Taytonn">Taytonn</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Masuk *</label>
+            <input type="date" id="stk-datein" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Qty Masuk *</label>
+            <div class="flex gap-2">
+              <input type="number" id="stk-qty" required min="0.0001" step="any" placeholder="0" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+              <select id="stk-unit" class="w-20 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+                <option value="GR">GR</option>
+                <option value="KG">KG</option>
+                <option value="ML">ML</option>
+              </select>
+            </div>
+            <p id="stk-qty-hint" class="text-[10px] text-slate-400 mt-1 hidden">Qty diubah lewat tabel keluar-masuk di detail sample.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Exp Date</label>
+            <input type="date" id="stk-exp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan</label>
+          <textarea id="stk-notes" rows="3" placeholder="Catatan tambahan (opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 flex justify-end gap-3 sticky bottom-0 bg-white">
+          <button type="button" onclick="closeModal('modal-stock')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 transition-all">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-sm transition-all">Simpan Sample</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CUSTOMER (MASTER DATA) DENGAN STRUKTUR 4 KOLOM ALAMAT -->
   <div id="modal-master-customer" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -1045,6 +1256,7 @@
 
     let salesData = JSON.parse(localStorage.getItem('st_sales_data')) || INITIAL_SALES;
     let sampleReports = JSON.parse(localStorage.getItem('st_sample_reports')) || [];
+    let sampleStock = (function () { try { return JSON.parse(localStorage.getItem('st_sample_stock')) || []; } catch (e) { return []; } })();
     
     // URL Web App Google Apps Script (diisi sekali di sini agar semua perangkat otomatis terhubung)
     const DEFAULT_SYNC_ENDPOINT = '';
@@ -1112,6 +1324,7 @@
       sortMasterCustomersAZ();
       localStorage.setItem('st_sales_data', JSON.stringify(salesData));
       localStorage.setItem('st_sample_reports', JSON.stringify(sampleReports));
+      localStorage.setItem('st_sample_stock', JSON.stringify(sampleStock));
     }
 
     function saveDataToStorage() {
@@ -1159,11 +1372,13 @@
       renderReportTable();
       renderSalesCards();
       renderMasterData();
+      renderSampleStock();
     }
 
     function applyServerData(res) {
       if (res.data && Array.isArray(res.data.salesData)) salesData = res.data.salesData;
       if (res.data && Array.isArray(res.data.sampleReports)) sampleReports = res.data.sampleReports;
+      if (res.data && Array.isArray(res.data.sampleStock)) sampleStock = res.data.sampleStock;
       persistLocal();
       localStorage.setItem('st_sync_rev', String(res.rev));
       localStorage.setItem('st_sync_dirty', '0');
@@ -1178,6 +1393,10 @@
       sampleReports.forEach(r => byId.set(r.id, r));
       (srv.sampleReports || []).forEach(r => byId.set(r.id, r));
       sampleReports = Array.from(byId.values());
+      const stockById = new Map();
+      sampleStock.forEach(x => stockById.set(x.id, x));
+      (srv.sampleStock || []).forEach(x => stockById.set(x.id, x));
+      sampleStock = Array.from(stockById.values());
       const bySales = new Map();
       salesData.forEach(sd => bySales.set(sd.code, sd));
       (srv.salesData || []).forEach(sv => {
@@ -1236,7 +1455,7 @@
             body: JSON.stringify({
               action: 'save',
               baseRev: server.rev,
-              data: { salesData, sampleReports }
+              data: { salesData, sampleReports, sampleStock }
             })
           });
           const res = await resp.json();
@@ -1299,10 +1518,12 @@
       populateSalesDropdowns();
       populateYearFilter();
       initScrollSync();
+      syncHeaderHeight();
       renderDashboard();
       renderReportTable();
       renderSalesCards();
       renderMasterData();
+      renderSampleStock();
       initOnlineSync();
     });
 
@@ -1310,6 +1531,15 @@
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('id-ID', options);
     }
+
+    // tinggi header (berubah di HP) dipakai sebagai posisi menempel kartu filter / pencarian
+    function syncHeaderHeight() {
+      const h = document.querySelector('header');
+      if (!h) return;
+      document.documentElement.style.setProperty('--hdr-h', Math.round(h.getBoundingClientRect().height) + 'px');
+    }
+    window.addEventListener('resize', syncHeaderHeight);
+    if (window.ResizeObserver) { document.addEventListener('DOMContentLoaded', () => { const h = document.querySelector('header'); if (h) new ResizeObserver(syncHeaderHeight).observe(h); }); }
 
     function initScrollSync() {
       const topScroll = document.getElementById('top-scrollbar-container');
@@ -1336,16 +1566,6 @@
         isSyncingTable = false;
       });
 
-      tableScroll.addEventListener('scroll', updateFreezeState, { passive: true });
-      updateFreezeState();
-    }
-
-    // Freeze dinamis: setelah Flag (52px) tergeser keluar, Flag dilepas dan
-    // kolom Customer Name & Sample Requested ikut di-freeze bersama Date Requested & Sales.
-    function updateFreezeState() {
-      const c = document.getElementById('table-scroll-container');
-      if (!c) return;
-      c.classList.toggle('freeze-b', c.scrollLeft > 52 * currentZoom);
     }
 
     function updateTopScrollbarWidth() {
@@ -1375,7 +1595,6 @@
         wrapper.style.width = '100%';
         indicator.innerText = `${Math.round(currentZoom * 100)}%`;
         updateTopScrollbarWidth();
-        updateFreezeState();
       }
     }
 
@@ -1435,7 +1654,360 @@
     }
 
     // ----- Perpindahan tab dengan animasi (arah geser mengikuti urutan tab) -----
-    const TAB_ORDER = ['dashboard', 'report', 'sales', 'master'];
+        // =========================================================================
+    // SAMPLE LIST — stok sample (daftar kartu baterai + detail keluar-masuk)
+    // Data: sampleStock[] { id, name, supplier, batch, category, dateIn, unit, expDate, notes,
+    //                        condition ('baik'|'rusak'|'expired'), conditionNote, movements[] }
+    // movement: { id, date, qtyIn, qtyOut, sales, customer, notes }   (baris pertama = stok awal)
+    // Qty remain = total qty masuk - total qty keluar
+    // =========================================================================
+    let selectedStockId = null;
+    let stockSortDir = 'asc';
+    const STOCK_STATUS_LABEL = { cukup: 'Cukup', kurang: 'Kurang', habis: 'Habis' };
+    const STOCK_COND_LABEL = { baik: 'Baik', rusak: 'Rusak', expired: 'Expired' };
+
+    function slEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function slToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function slDayDiff(a, b) {
+      const pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+      return Math.round((Date.UTC(pb[0], pb[1] - 1, pb[2]) - Date.UTC(pa[0], pa[1] - 1, pa[2])) / 86400000);
+    }
+    function slNum(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
+    function slFmt(n) { return (Math.round(n * 100) / 100).toLocaleString('id-ID', { maximumFractionDigits: 2 }); }
+    function slBase(n, unit) { return unit === 'KG' ? n * 1000 : n; }
+    function slNewId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function slEl(id) { return document.getElementById(id); }
+    function slFindStock(id) { return sampleStock.find(s => s.id === id); }
+
+    function stockMetrics(s) {
+      let tin = 0, tout = 0;
+      (s.movements || []).forEach(m => { tin += slNum(m.qtyIn); tout += slNum(m.qtyOut); });
+      const remain = tin - tout;
+      const pct = tin > 0 ? Math.max(0, remain / tin * 100) : 0;
+      const today = slToday();
+      const aging = s.dateIn ? Math.max(0, slDayDiff(s.dateIn, today)) : 0;
+      const expDays = s.expDate ? slDayDiff(today, s.expDate) : null;
+      const autoExpired = expDays !== null && expDays < 0;
+      const cond = autoExpired ? 'expired' : (s.condition || 'baik');
+      const status = remain <= 0 ? 'habis' : (pct > 50 ? 'cukup' : 'kurang');
+      // warna border kartu: 100% hijau, 51-99% putih, 21-50% oranye, 0-20% merah
+      const bat = remain <= 0 ? 'red' : (pct >= 99.999 ? 'green' : (pct > 50 ? 'white' : (pct > 20 ? 'orange' : 'red')));
+      return { tin, tout, remain, pct, aging, expDays, autoExpired, cond, status, bat };
+    }
+
+    function stockFiltered() {
+      const q = (slEl('sl-search') ? slEl('sl-search').value : '').trim().toLowerCase();
+      const fCat = slEl('sl-f-cat') ? slEl('sl-f-cat').value : '';
+      const fSup = slEl('sl-f-sup') ? slEl('sl-f-sup').value : '';
+      const fSt = slEl('sl-f-st') ? slEl('sl-f-st').value : '';
+      const fCond = slEl('sl-f-cond') ? slEl('sl-f-cond').value : '';
+      const sort = slEl('sl-sort') ? slEl('sl-sort').value : 'name';
+      const dir = stockSortDir === 'desc' ? -1 : 1;
+
+      const rows = sampleStock.map(s => ({ s, m: stockMetrics(s) })).filter(({ s, m }) => {
+        if (fCat && s.category !== fCat) return false;
+        if (fSup && s.supplier !== fSup) return false;
+        if (fSt && m.status !== fSt) return false;
+        if (fCond && m.cond !== fCond) return false;
+        if (q && !(`${s.name} ${s.supplier} ${s.batch || ''}`.toLowerCase().includes(q))) return false;
+        return true;
+      });
+
+      const byName = (a, b) => String(a.s.name).localeCompare(String(b.s.name), 'id', { sensitivity: 'base', numeric: true });
+      rows.sort((a, b) => {
+        let c = 0;
+        if (sort === 'name') c = byName(a, b);
+        else if (sort === 'remain') c = slBase(a.m.remain, a.s.unit) - slBase(b.m.remain, b.s.unit);
+        else if (sort === 'aging') c = a.m.aging - b.m.aging;
+        else if (sort === 'exp') {
+          const ea = a.s.expDate || '', eb = b.s.expDate || '';
+          if (!ea && !eb) c = 0;
+          else if (!ea) return 1;          // tanpa exp date selalu di akhir
+          else if (!eb) return -1;
+          else c = ea < eb ? -1 : (ea > eb ? 1 : 0);
+        }
+        return (c * dir) || byName(a, b);
+      });
+      return rows.map(r => r.s);
+    }
+
+    function onStockSortChange() {
+      stockSortDir = slEl('sl-sort').value === 'aging' ? 'desc' : 'asc';   // aging: terlama dulu
+      updateStockDirButton();
+      renderSampleStock();
+    }
+    function toggleStockDir() { stockSortDir = stockSortDir === 'asc' ? 'desc' : 'asc'; updateStockDirButton(); renderSampleStock(); }
+    function updateStockDirButton() {
+      const b = slEl('sl-dir'); if (!b) return;
+      b.textContent = stockSortDir === 'asc' ? '↑' : '↓';
+      const sort = slEl('sl-sort').value;
+      const names = { name: ['A–Z', 'Z–A'], remain: ['sisa terkecil dulu', 'sisa terbanyak dulu'], exp: ['exp terdekat dulu', 'exp terjauh dulu'], aging: ['aging terbaru dulu', 'aging terlama dulu'] };
+      b.title = 'Urutan: ' + names[sort][stockSortDir === 'asc' ? 0 : 1] + ' (klik untuk membalik)';
+    }
+
+    function renderStockCards() {
+      const list = stockFiltered();
+      const wrap = slEl('sl-cards');
+      if (!wrap) return list;
+      const keepScroll = wrap.scrollLeft;
+      slEl('sl-count').textContent = list.length === sampleStock.length ? String(list.length) : `${list.length}/${sampleStock.length}`;
+      if (!list.length) {
+        wrap.innerHTML = `<div class="sl-empty">${sampleStock.length ? 'Tidak ada sample yang sesuai pencarian / filter.' : 'Belum ada sample. Klik <b class="mx-1">Tambah</b> untuk memasukkan sample pertama.'}</div>`;
+        return list;
+      }
+      wrap.innerHTML = list.map(s => {
+        const m = stockMetrics(s);
+        return `<div class="bat bat-${m.bat}${s.id === selectedStockId ? ' is-sel' : ''}" role="button" tabindex="0" data-id="${s.id}" onclick="selectStock('${s.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStock('${s.id}')}" title="${slEsc(s.name)} — sisa ${slFmt(m.remain)} ${s.unit} (${Math.round(m.pct)}%)"><span class="bat-name">${slEsc(s.name)}</span></div>`;
+      }).join('');
+      wrap.scrollLeft = keepScroll;
+      return list;
+    }
+
+    function selectStock(id) {
+      selectedStockId = id;
+      renderStockCards();
+      renderStockDetail();
+      const card = document.querySelector(`#sl-cards .bat[data-id="${id}"]`);
+      if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+
+    function renderSampleStock() {
+      if (!slEl('sl-cards')) return;
+      // opsi supplier mengikuti data
+      const supSel = slEl('sl-f-sup');
+      const cur = supSel.value;
+      const sups = Array.from(new Set(sampleStock.map(s => s.supplier).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+      supSel.innerHTML = '<option value="">Supplier</option>' + sups.map(x => `<option value="${slEsc(x)}">${slEsc(x)}</option>`).join('');
+      supSel.value = sups.includes(cur) ? cur : '';
+      ['sl-f-cat', 'sl-f-sup', 'sl-f-st', 'sl-f-cond'].forEach(id => slEl(id).classList.toggle('is-on', !!slEl(id).value));
+      updateStockDirButton();
+
+      const list = stockFiltered();
+      if (!slFindStock(selectedStockId)) selectedStockId = (list[0] || sampleStock[0] || {}).id || null;
+      renderStockCards();
+      renderStockDetail();
+    }
+
+    function salesOptsHTML(sel) {
+      let h = '<option value="">Pilih sales</option>';
+      salesData.forEach(sp => { if (sp.active || sp.code === sel) h += `<option value="${slEsc(sp.code)}"${sp.code === sel ? ' selected' : ''}>${slEsc(sp.code)} - ${slEsc(sp.name)}</option>`; });
+      return h;
+    }
+    function custOptsHTML(salesCode, sel) {
+      if (!salesCode) return '<option value="">Pilih sales dulu</option>';
+      const sp = salesData.find(x => x.code === salesCode);
+      const names = (sp && sp.customers ? sp.customers : []).map(c => c.name);
+      let h = '<option value="">Pilih customer</option>';
+      if (sel && !names.includes(sel)) h += `<option value="${slEsc(sel)}" selected>${slEsc(sel)}</option>`;
+      names.forEach(n => { h += `<option value="${slEsc(n)}"${n === sel ? ' selected' : ''}>${slEsc(n)}</option>`; });
+      return h;
+    }
+
+    function stockRowHTML(mv) {
+      return `<tr data-mv="${mv.id}">
+        <td style="width:140px"><input type="date" value="${slEsc(mv.date || '')}" onchange="updateMovement('${mv.id}','date',this.value)"></td>
+        <td style="width:100px"><input type="number" min="0" step="any" value="${mv.qtyIn === '' || mv.qtyIn == null ? '' : slEsc(mv.qtyIn)}" placeholder="0" oninput="updateMovement('${mv.id}','qtyIn',this.value)"></td>
+        <td style="width:100px"><input type="number" min="0" step="any" value="${mv.qtyOut === '' || mv.qtyOut == null ? '' : slEsc(mv.qtyOut)}" placeholder="0" oninput="updateMovement('${mv.id}','qtyOut',this.value)"></td>
+        <td style="width:170px"><select onchange="updateMovementSales('${mv.id}',this.value)">${salesOptsHTML(mv.sales)}</select></td>
+        <td style="width:210px"><select id="mv-cust-${mv.id}" onchange="updateMovement('${mv.id}','customer',this.value)">${custOptsHTML(mv.sales, mv.customer)}</select></td>
+        <td><input type="text" value="${slEsc(mv.notes || '')}" placeholder="Keterangan" oninput="updateMovement('${mv.id}','notes',this.value)"></td>
+        <td style="width:44px" class="text-center"><button type="button" onclick="deleteMovement('${mv.id}')" title="Hapus baris" aria-label="Hapus baris" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></td>
+      </tr>`;
+    }
+
+    function stockExpText(m, s) {
+      if (!s.expDate) return '<b>-</b>';
+      const d = m.expDays;
+      const rel = d < 0 ? `lewat ${Math.abs(d)} hari` : (d === 0 ? 'hari ini' : `${d} hari lagi`);
+      return `<b>${slEsc(s.expDate)}</b><span>${rel}</span>`;
+    }
+
+    function renderStockDetail() {
+      const box = slEl('sl-detail');
+      if (!box) return;
+      const s = slFindStock(selectedStockId);
+      if (!s) {
+        box.innerHTML = '<div class="sd-empty">Pilih salah satu kartu sample di atas untuk melihat detail dan riwayat keluar-masuknya.</div>';
+        return;
+      }
+      const m = stockMetrics(s);
+      const rows = (s.movements || []).map(stockRowHTML).join('');
+      box.innerHTML = `
+        <div class="sd-head">
+          <div class="sd-title">
+            <div class="sd-name"><span>${slEsc(s.name)}</span><span class="sd-cat">${slEsc(s.category)}</span></div>
+            <div class="sd-line">Supplier: <b>${slEsc(s.supplier)}</b>${s.batch ? ` · Batch/Lot: <b>${slEsc(s.batch)}</b>` : ''} · Masuk: ${slEsc(s.dateIn || '-')}</div>
+            ${s.notes ? `<div class="sd-line" title="${slEsc(s.notes)}">Ket: ${slEsc(s.notes.length > 110 ? s.notes.slice(0, 110) + '…' : s.notes)}</div>` : ''}
+            <div class="sd-metrics">
+              <div class="sd-metric"><small>Qty Remain</small><b id="sd-remain">${slFmt(m.remain)} ${slEsc(s.unit)}</b><span id="sd-pct">${Math.round(m.pct)}%</span></div>
+              <div class="sd-metric"><small>Aging</small><b>${m.aging} hari</b></div>
+              <div class="sd-metric"><small>Exp Date</small><span id="sd-exp" style="margin-left:0">${stockExpText(m, s)}</span></div>
+            </div>
+          </div>
+          <div class="sd-hl">
+            <div class="sd-hl-row"><span>Status Qty</span><span id="sd-status" class="sd-badge st-${m.status}">${STOCK_STATUS_LABEL[m.status]}</span></div>
+            <div class="sd-hl-row"><span>Kondisi</span>
+              <select id="sd-cond" onchange="setStockCondition(this.value)" ${m.autoExpired ? 'disabled title="Otomatis expired karena melewati Exp Date"' : ''}>
+                <option value="baik"${m.cond === 'baik' ? ' selected' : ''}>Baik</option>
+                <option value="rusak"${m.cond === 'rusak' ? ' selected' : ''}>Rusak</option>
+                <option value="expired"${m.cond === 'expired' ? ' selected' : ''}>Expired${m.autoExpired ? ' (otomatis)' : ''}</option>
+              </select>
+            </div>
+            ${m.cond === 'rusak' ? `<input type="text" id="sd-cond-note" value="${slEsc(s.conditionNote || '')}" placeholder="Catatan kerusakan..." oninput="setStockCondNote(this.value)">` : ''}
+            <div class="sd-actions">
+              <button type="button" onclick="openStockModal('${s.id}')" title="Edit sample"><i data-lucide="pencil" class="w-3 h-3"></i> Edit</button>
+              <button type="button" onclick="deleteStock('${s.id}')" title="Hapus sample" class="hover:text-rose-600"><i data-lucide="trash-2" class="w-3 h-3"></i> Hapus</button>
+            </div>
+          </div>
+        </div>
+        <div class="sd-tablebar">
+          <h3>Riwayat Keluar-Masuk</h3>
+          <button type="button" onclick="addMovement()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm transition-all"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Baris</button>
+        </div>
+        <div class="sd-table-wrap custom-scrollbar">
+          <table class="sd-table">
+            <thead><tr><th>Tanggal</th><th>Qty Masuk</th><th>Qty Keluar</th><th>Sales Person</th><th>Customer</th><th>Keterangan</th><th></th></tr></thead>
+            <tbody id="sd-body">${rows || ''}</tbody>
+            <tfoot><tr><td>Total</td><td id="sd-tin" style="text-align:right">${slFmt(m.tin)}</td><td id="sd-tout" style="text-align:right">${slFmt(m.tout)}</td><td colspan="4" id="sd-tfoot-remain">Sisa: ${slFmt(m.remain)} ${slEsc(s.unit)}</td></tr></tfoot>
+          </table>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    // perbarui angka di header, tabel (total) dan kartu tanpa membangun ulang baris yang sedang diedit
+    function refreshStockLive() {
+      const s = slFindStock(selectedStockId);
+      if (!s) return;
+      const m = stockMetrics(s);
+      const set = (id, html) => { const e = slEl(id); if (e) e.innerHTML = html; };
+      set('sd-remain', `${slFmt(m.remain)} ${slEsc(s.unit)}`);
+      set('sd-pct', `${Math.round(m.pct)}%`);
+      set('sd-tin', slFmt(m.tin)); set('sd-tout', slFmt(m.tout));
+      set('sd-tfoot-remain', `Sisa: ${slFmt(m.remain)} ${slEsc(s.unit)}`);
+      const st = slEl('sd-status');
+      if (st) { st.className = `sd-badge st-${m.status}`; st.textContent = STOCK_STATUS_LABEL[m.status]; }
+      renderStockCards();
+    }
+
+    function updateMovement(id, field, val) {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      const mv = s.movements.find(x => x.id === id); if (!mv) return;
+      if (field === 'qtyIn' || field === 'qtyOut') mv[field] = val === '' ? '' : Math.max(0, slNum(val));
+      else mv[field] = val;
+      saveDataToStorage();
+      if (field === 'qtyIn' || field === 'qtyOut') refreshStockLive();
+    }
+    function updateMovementSales(id, code) {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      const mv = s.movements.find(x => x.id === id); if (!mv) return;
+      mv.sales = code;
+      const sp = salesData.find(x => x.code === code);
+      const names = sp && sp.customers ? sp.customers.map(c => c.name) : [];
+      if (!names.includes(mv.customer)) mv.customer = '';
+      const sel = slEl('mv-cust-' + id);
+      if (sel) sel.innerHTML = custOptsHTML(code, mv.customer);
+      saveDataToStorage();
+    }
+    function addMovement() {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      const mv = { id: slNewId('mv-'), date: slToday(), qtyIn: '', qtyOut: '', sales: '', customer: '', notes: '' };
+      s.movements.push(mv);
+      saveDataToStorage();
+      const body = slEl('sd-body');
+      body.insertAdjacentHTML('beforeend', stockRowHTML(mv));
+      lucide.createIcons();
+      const wrap = document.querySelector('#sl-detail .sd-table-wrap');
+      if (wrap) wrap.scrollTop = wrap.scrollHeight;
+      const first = body.querySelector(`tr[data-mv="${mv.id}"] input[type="number"]`);
+      if (first) first.focus();
+      refreshStockLive();
+    }
+    function deleteMovement(id) {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      if (!confirm('Hapus baris keluar-masuk ini?')) return;
+      s.movements = s.movements.filter(x => x.id !== id);
+      saveDataToStorage();
+      const row = document.querySelector(`#sd-body tr[data-mv="${id}"]`);
+      if (row) row.remove();
+      refreshStockLive();
+    }
+    function setStockCondition(val) {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      s.condition = val;
+      if (val !== 'rusak') s.conditionNote = '';
+      saveDataToStorage();
+      renderSampleStock();
+      if (val === 'rusak') { const n = slEl('sd-cond-note'); if (n) n.focus(); }
+    }
+    function setStockCondNote(val) {
+      const s = slFindStock(selectedStockId); if (!s) return;
+      s.conditionNote = val;
+      saveDataToStorage();
+    }
+
+    function openStockModal(id) {
+      const s = id ? slFindStock(id) : null;
+      slEl('stock-form').reset();
+      slEl('stk-edit-id').value = s ? s.id : '';
+      slEl('stk-modal-title').innerText = s ? 'Edit Sample' : 'Tambah Sample';
+      const sups = Array.from(new Set(sampleStock.map(x => x.supplier).filter(Boolean)));
+      slEl('stk-supplier-list').innerHTML = sups.map(x => `<option value="${slEsc(x)}"></option>`).join('');
+      slEl('stk-datein').value = s ? (s.dateIn || '') : slToday();
+      if (s) {
+        slEl('stk-name').value = s.name; slEl('stk-supplier').value = s.supplier; slEl('stk-batch').value = s.batch || '';
+        slEl('stk-cat').value = s.category; slEl('stk-unit').value = s.unit; slEl('stk-exp').value = s.expDate || '';
+        slEl('stk-notes').value = s.notes || '';
+        slEl('stk-qty').value = stockMetrics(s).tin; slEl('stk-qty').disabled = true; slEl('stk-qty').required = false;
+        slEl('stk-qty-hint').classList.remove('hidden');
+      } else {
+        slEl('stk-qty').disabled = false; slEl('stk-qty').required = true;
+        slEl('stk-qty-hint').classList.add('hidden');
+      }
+      slEl('modal-stock').classList.remove('hidden');
+      setTimeout(() => slEl('stk-name').focus(), 50);
+    }
+
+    function saveStock(e) {
+      e.preventDefault();
+      const id = slEl('stk-edit-id').value;
+      const f = {
+        name: slEl('stk-name').value.trim(), supplier: slEl('stk-supplier').value.trim(), batch: slEl('stk-batch').value.trim(),
+        category: slEl('stk-cat').value, dateIn: slEl('stk-datein').value, unit: slEl('stk-unit').value,
+        expDate: slEl('stk-exp').value, notes: slEl('stk-notes').value.trim()
+      };
+      if (!f.name || !f.supplier || !f.category || !f.dateIn) return;
+      if (id) {
+        const s = slFindStock(id); if (!s) return;
+        Object.assign(s, f);
+        selectedStockId = s.id;
+      } else {
+        const qty = slNum(slEl('stk-qty').value);
+        if (qty <= 0) { alert('Qty masuk harus lebih dari 0.'); return; }
+        const s = Object.assign({ id: slNewId('stk-'), condition: 'baik', conditionNote: '' }, f, {
+          movements: [{ id: slNewId('mv-'), date: f.dateIn, qtyIn: qty, qtyOut: '', sales: '', customer: '', notes: 'Stok awal' }]
+        });
+        sampleStock.push(s);
+        selectedStockId = s.id;
+        // pastikan sample baru terlihat
+        slEl('sl-search').value = ''; ['sl-f-cat', 'sl-f-sup', 'sl-f-st', 'sl-f-cond'].forEach(i => { slEl(i).value = ''; });
+      }
+      saveDataToStorage();
+      closeModal('modal-stock');
+      renderSampleStock();
+      const card = document.querySelector(`#sl-cards .bat[data-id="${selectedStockId}"]`);
+      if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+
+    function deleteStock(id) {
+      const s = slFindStock(id); if (!s) return;
+      if (!confirm(`Hapus sample "${s.name}" beserta seluruh riwayat keluar-masuknya?`)) return;
+      sampleStock = sampleStock.filter(x => x.id !== id);
+      if (selectedStockId === id) selectedStockId = null;
+      saveDataToStorage();
+      renderSampleStock();
+    }
+
+    const TAB_ORDER = ['dashboard', 'report', 'sales', 'stock', 'master'];
     let visibleTab = 'dashboard';
     let tabSwitchTimer = null;
 
@@ -1454,6 +2026,7 @@
       if (tabName === 'dashboard') renderDashboard();
       if (tabName === 'report') renderReportTable();
       if (tabName === 'sales') renderSalesCards();
+      if (tabName === 'stock') renderSampleStock();
       if (tabName === 'master') renderMasterData();
     }
 
@@ -1831,10 +2404,10 @@
                 <div class="text-[10px] text-slate-400 mt-1">Est. Feedback:</div>
                 <div class="text-[11px] font-semibold ${isItemFlagged ? 'text-rose-600' : 'text-slate-600'}">${req.estimatedFeedbackDate}</div>
               </td>
-              <td rowspan="${itemCount}" class="freeze-col freeze-last p-2 align-top border-r border-slate-200 text-center" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px">
+              <td rowspan="${itemCount}" class="freeze-col col-sales p-2 align-top border-r border-slate-200 text-center" style="left:var(--l-sales);width:64px;min-width:64px;max-width:64px">
                 <span class="bg-indigo-50 text-indigo-700 font-bold px-1.5 py-0.5 rounded text-[11px] inline-block">${req.salesCode}</span>
               </td>
-              <td rowspan="${itemCount}" class="col-cust p-3 align-top border-r border-slate-200" style="width:180px;min-width:180px;max-width:180px">
+              <td rowspan="${itemCount}" class="col-cust freeze-col freeze-last p-3 align-top border-r border-slate-200" style="left:var(--l-cust);width:180px;min-width:180px;max-width:180px">
                 <div class="font-bold text-slate-800">${req.customerName}</div>
                 <div class="text-[10px] text-slate-400 mt-0.5">${getSafeString(req.customerContact)}</div>
               </td>
@@ -2990,6 +3563,25 @@
       const worksheet = XLSX.utils.json_to_sheet(exportRows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Sample Reports");
+      if (sampleStock.length) {
+        const listRows = [], moveRows = [];
+        sampleStock.forEach(st => {
+          const m = stockMetrics(st);
+          listRows.push({
+            'Nama Sample': st.name, 'Supplier': st.supplier, 'Batch/Lot': st.batch || '', 'Kategori': st.category,
+            'Tanggal Masuk': st.dateIn, 'Exp Date': st.expDate || '', 'Unit': st.unit,
+            'Total Masuk': m.tin, 'Total Keluar': m.tout, 'Qty Remain': m.remain,
+            'Status Qty': STOCK_STATUS_LABEL[m.status], 'Kondisi': STOCK_COND_LABEL[m.cond] + (m.cond === 'rusak' && st.conditionNote ? ' - ' + st.conditionNote : ''),
+            'Keterangan': st.notes || ''
+          });
+          (st.movements || []).forEach(mv => moveRows.push({
+            'Nama Sample': st.name, 'Batch/Lot': st.batch || '', 'Tanggal': mv.date, 'Qty Masuk': mv.qtyIn === '' ? '' : mv.qtyIn,
+            'Qty Keluar': mv.qtyOut === '' ? '' : mv.qtyOut, 'Unit': st.unit, 'Sales Person': mv.sales || '', 'Customer': mv.customer || '', 'Keterangan': mv.notes || ''
+          }));
+        });
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(listRows), "Sample List");
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(moveRows), "Mutasi Sample");
+      }
       XLSX.writeFile(workbook, `Sample_Tracker_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
